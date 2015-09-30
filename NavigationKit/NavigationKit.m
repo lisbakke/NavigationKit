@@ -62,9 +62,88 @@ static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
   return self;
 }
 
-- (void)calculateDirections
-{
-  [self calculateDirectionsWithHeading:-1];
+- (void)calculateDirectionsGoogleMapsWithHeading:(CLLocationDirection)heading {
+
+  NSString *mode = @"driving";
+  if(_transportType == MKDirectionsTransportTypeWalking)
+    mode = @"walking";
+
+  NSString *requestURL = [NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/directions/json?origin=%f,"
+                                                        "%f&destination=%f,%f&sensor=true&mode=%@&language=%@&key=%@",
+                                                    self.source.latitude,
+                                                    self.source.longitude,
+                                                    self.destination.latitude,
+                                                    self.destination.longitude,
+                                                    mode,
+                                                    [[NSLocale currentLocale] objectForKey:NSLocaleLanguageCode],
+                                                    self.googleApiKey];
+
+  NSURL *url = [NSURL URLWithString:[requestURL stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+  NSURLRequest *request = [NSURLRequest requestWithURL:url];
+
+  [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+
+    NSError *error = nil;
+
+    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    if (error) {
+      if ([delegate respondsToSelector:@selector(navigationKitError:)])
+        [delegate navigationKitError:error];
+      return;
+    }
+
+    NSArray *routes = result[@"routes"];
+    if (!routes) {
+      if ([delegate respondsToSelector:@selector(navigationKitError:)]) {
+        NSDictionary *userInfo = @{
+            NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
+            NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Could not find any routes for specified locations", nil)
+        };
+        [delegate navigationKitError:[NSError errorWithDomain:NavigationKitErrorDomain code:-2 userInfo:userInfo]];
+      }
+      return;
+    }
+
+    if (![routes firstObject]) {
+      if ([delegate respondsToSelector:@selector(navigationKitError:)]) {
+        NSDictionary *userInfo = @{
+            NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
+            NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Could not find any routes for specified locations", nil)
+        };
+        [delegate navigationKitError:[NSError errorWithDomain:NavigationKitErrorDomain code:-2 userInfo:userInfo]];
+      }
+      return;
+    }
+
+    // both of these are NKRoute objects
+    NSMutableArray *allRoutes = [@[] mutableCopy];
+    for (NSDictionary *route in routes) {
+      // converts to NKRoute so we don't need to deal with C arrays
+      NKRoute *nkRoute = [[NKRoute alloc] initWithGoogleMapsRoute:route];
+
+      // add nkRoute to all routes
+      [allRoutes addObject:nkRoute];
+    }
+
+    NSMutableArray *noturnRoutes = [self getNoturnRoutes:heading response:allRoutes];
+
+    if ([noturnRoutes count] > 0) {
+      // some routes don't involve turning around
+      // even if this could result in longer drive time
+      // this could still potentially be better
+      allRoutes = noturnRoutes;
+    }
+
+    // we still need to sort the routes by predicted travel time
+    //
+    // so the user wouldn't see stupid route that tells them to travel
+    // through a long path then turn around multiple times
+    //
+    self.route = [[allRoutes sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"expectedTravelTime" ascending:YES]]] firstObject];
+
+    if ([delegate respondsToSelector:@selector(navigationKitCalculatedRoute:)])
+      [delegate navigationKitCalculatedRoute:_route];
+  }];
 }
 
 - (void)calculateDirectionsWithHeading:(CLLocationDirection)heading {
@@ -73,6 +152,9 @@ static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
   switch (self.directionsService) {
     case NavigationKitDirectionsServiceAppleMaps:
       [self calculateDirectionsAppleMapsWithHeading:heading];
+      break;
+    case NavigationKitDirectionsServiceGoogleMaps:
+      [self calculateDirectionsGoogleMapsWithHeading:heading];
       break;
     default: {
       NSDictionary *userInfo = @{
@@ -108,7 +190,7 @@ static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
     [delegate navigationKitStartedNavigation];
 
   // This might be a temporary fix, but for now, notify the delegate that we entered step "0"
-  if([delegate respondsToSelector:@selector(navigationKitEnteredRouteStep:nextStep:)]) {
+  if ([delegate respondsToSelector:@selector(navigationKitEnteredRouteStep:nextStep:)]) {
     NKRouteStep *firstStep = self.route.steps[self.lastCurrentStepNum];
     if (firstStep) {
       [self.enteredRouteStepNotifications addObject:firstStep];
@@ -336,8 +418,8 @@ static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
   MKDirections *directions = [[MKDirections alloc] initWithRequest:directionsRequest];
 
   [directions calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
-    if(error) {
-      if([delegate respondsToSelector:@selector(navigationKitError:)])
+    if (error) {
+      if ([delegate respondsToSelector:@selector(navigationKitError:)])
         [delegate navigationKitError:error];
       return;
     }
@@ -366,9 +448,9 @@ static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
     // so the user wouldn't see stupid route that tells them to travel
     // through a long path then turn around multiple times
     //
-    self.route = [[allRoutes sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"expectedTravelTime" ascending:YES]]] firstObject];
+    self.route = [[allRoutes sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"expectedTravelTime" ascending:YES]]] firstObject];
 
-    if([delegate respondsToSelector:@selector(navigationKitCalculatedRoute:)])
+    if ([delegate respondsToSelector:@selector(navigationKitCalculatedRoute:)])
       [delegate navigationKitCalculatedRoute:self.route];
   }];
 }

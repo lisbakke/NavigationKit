@@ -10,6 +10,44 @@
 
 @implementation NKRouteStep
 
+- (id)initWithGoogleMapsStep:(NSDictionary *)step {
+    self = [super init];
+
+    if (self) {
+        NSString *encodedPolyline = [[step valueForKey:@"polyline"] valueForKey:@"points"];
+
+        GMSPath *gmsPath = [GMSPath pathFromEncodedPath:encodedPolyline];
+
+        NSMutableArray *path = [@[] mutableCopy];
+        for (NSUInteger i = 0; i < gmsPath.count; i++) {
+            [path addObject:[NSValue valueWithMKCoordinate:[gmsPath coordinateAtIndex:i]]];
+        }
+        self.path = path;
+        CLLocationCoordinate2D *coordinates = calloc([self.path count], sizeof(CLLocationCoordinate2D));
+
+        for (int i = 0; i < [self.path count]; i++) {
+            coordinates[i] = ((NSValue *)self.path[i]).MKCoordinateValue;
+        }
+
+        self.polyline = [MKPolyline polylineWithCoordinates:coordinates count:[self.path count]];
+
+        free(coordinates);
+
+        self.instructions = [step valueForKey:@"html_instructions"];
+        self.instructions = [self.instructions stringByReplacingOccurrencesOfString:@"<b>"
+                                                                         withString:@""];
+        self.instructions = [self.instructions stringByReplacingOccurrencesOfString:@"</b>"
+                                                                         withString:@""];
+        self.distance = [[[step valueForKey:@"distance"] valueForKey:@"value"] doubleValue];
+        if([[step valueForKey:@"travel_mode"] isEqualToString:@"DRIVING"])
+            self.transportType = MKDirectionsTransportTypeAutomobile;
+
+        self.maneuver = [self maneuver:[step valueForKey:@"maneuver"]];
+    }
+
+    return self;
+}
+
 - (id)initWithMKRouteStep:(MKRouteStep *)step {
     self = [super init];
     

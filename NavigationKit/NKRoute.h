@@ -19,6 +19,7 @@
 
 @property (nonatomic) CLLocationDistance distance;
 
-- (id)initWithMKRoute:(MKRoute *)route;
+- (instancetype)initWithMKRoute:(MKRoute *)route;
 
+- (instancetype)initWithGoogleMapsRoute:(NSDictionary *)route;
 @end
