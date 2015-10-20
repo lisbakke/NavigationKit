@@ -12,6 +12,7 @@
 
 #define NavigationKitErrorDomain @"com.navigationkit"
 
+
 @interface NavigationKit ()
 
 // Initializing
@@ -41,6 +42,8 @@
 static NSTimeInterval kMinTimeBetweenRecalculations = 10.f;
 static double kMinNewSmallStepNotifDistance = 152.f; // 500 ft
 static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
+static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
+
 - (id)initWithSource:(CLLocationCoordinate2D)source destination:(CLLocationCoordinate2D)destination
        transportType:(MKDirectionsTransportType)transportType
    directionsService:(NavigationKitDirectionsService)directionsService {
@@ -255,6 +258,11 @@ static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
   }
 
   self.distanceToEndOfRoute = [self distanceToEndOfRoute:newCurrentRouteStep location:location];
+  if (self.distanceToEndOfRoute <= kDistanceToEndOfRouteTriggersArrived) {
+    [self arrivedAtDestination];
+    return;
+  }
+
   if([delegate respondsToSelector:@selector(navigationKitCalculatedDistanceToEndOfRoute:)]) {
     [delegate navigationKitCalculatedDistanceToEndOfRoute:self.distanceToEndOfRoute];
   }

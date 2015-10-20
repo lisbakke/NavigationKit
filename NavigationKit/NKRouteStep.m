@@ -34,10 +34,13 @@
         free(coordinates);
 
         self.instructions = [step valueForKey:@"html_instructions"];
-        self.instructions = [self.instructions stringByReplacingOccurrencesOfString:@"<b>"
-                                                                         withString:@""];
-        self.instructions = [self.instructions stringByReplacingOccurrencesOfString:@"</b>"
-                                                                         withString:@""];
+        // Change a string such as:
+        // Race Ct turns left and becomes E 3rd Ave<div style="font-size:0.9em">Destination will be on the left</div>
+        // to
+        // Race Ct turns left and becomes E 3rd Ave<div style="font-size:0.9em">. Destination will be on the left</div>
+        // Because we will strip out the HTML later.
+        self.instructions = [self.instructions stringByReplacingOccurrencesOfString:@">Destination"
+                                                                         withString:@">. Destination"];
         self.distance = [[[step valueForKey:@"distance"] valueForKey:@"value"] doubleValue];
         if([[step valueForKey:@"travel_mode"] isEqualToString:@"DRIVING"])
             self.transportType = MKDirectionsTransportTypeAutomobile;

@@ -98,7 +98,7 @@
                 step.maneuver = nextStep.maneuver;
             } else {
                 step.instructions = @"Arrived at destination.";
-                step.maneuver = NKRouteStepManeuverUnknown;
+                step.maneuver = NKRouteStepManeuverArrived;
             }
         }
 

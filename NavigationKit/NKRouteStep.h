@@ -32,7 +32,8 @@ typedef NS_ENUM(NSInteger, NKRouteStepManeuver) {
     NKRouteStepManeuverRampLeft,
     NKRouteStepManeuverFerry,
     NKRouteStepManeuverKeepLeft,
-    NKRouteStepManeuverKeepRight
+    NKRouteStepManeuverKeepRight,
+    NKRouteStepManeuverArrived
 };
 
 @interface NKRouteStep : NSObject
