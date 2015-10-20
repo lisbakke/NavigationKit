@@ -33,6 +33,7 @@ typedef NS_ENUM(NSInteger, NavigationKitNotificationDistanceType) {
 - (void)navigationKitEnteredRouteStep:(NKRouteStep *)step nextStep:(NKRouteStep *)nextStep;
 - (void)navigationKitCalculatedDistanceToEndOfPath:(CLLocationDistance)distance;
 - (void)navigationKitCalculatedDistanceToEndOfRoute:(CLLocationDistance)distance;
+- (void)navigationKitCalculatedTimeToEndOfRoute:(NSTimeInterval)time;
 
 - (void)navigationKitCalculatedNotificationForStep:(NKRouteStep *)step
                                         inDistance:(CLLocationDistance)distance

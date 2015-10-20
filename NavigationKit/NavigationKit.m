@@ -260,10 +260,15 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   }
 
   self.distanceToEndOfRoute = [self distanceToEndOfRoute:newCurrentRouteStep location:location];
-  NSLog(@"self.distancetoendofroute %f", self.distanceToEndOfRoute);
   if (self.distanceToEndOfRoute <= kDistanceToEndOfRouteTriggersArrived) {
     [self arrivedAtDestination];
     return;
+  }
+
+  NSTimeInterval time = [self calculateTimeToDestinationWithStep:newCurrentRouteStep withDistanceToEndOfStep:self
+      .distanceToEndOfPath];
+  if ([delegate respondsToSelector:@selector(navigationKitCalculatedTimeToEndOfRoute:)]) {
+    [delegate navigationKitCalculatedTimeToEndOfRoute:time];
   }
 
   if([delegate respondsToSelector:@selector(navigationKitCalculatedDistanceToEndOfRoute:)]) {
@@ -311,12 +316,23 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   }
 }
 
+- (NSTimeInterval)calculateTimeToDestinationWithStep:(NKRouteStep *)step withDistanceToEndOfStep:(CLLocationDistance)distanceToEnd {
+  NSTimeInterval totalTime = self.route.expectedTravelTime;
+  for (NKRouteStep *curStep in self.route.steps) {
+    if (curStep == step) break;
+    totalTime -= curStep.expectedTravelTime;
+  }
+  CGFloat percentDoneWithCurrentStep = 1 - (CGFloat) (distanceToEnd / step.distance);
+  totalTime -= (step.expectedTravelTime * percentDoneWithCurrentStep);
+  return totalTime;
+}
+
 - (BOOL)notifyNextStep:(NKRouteStep *)step inDistance:(CLLocationDistance)distanceToEndOfPath
               forSpeed:(CLLocationSpeed)speed {
   NSNumber *etaSeconds = [self etaSecondsForDistance:distanceToEndOfPath withSpeed:speed];
   if (!etaSeconds) return NO;
   CGFloat etaFloat = etaSeconds.floatValue;
-  NSLog(@"Eta seconds %@", etaSeconds);
+//  NSLog(@"Eta seconds %@", etaSeconds);
   if (etaFloat < self.nextTurnNotifSmallEtaSeconds &&
       ![self hasNotifiedSmallStep:step]) {
     [self notify:NavigationKitNotificationDistanceTypeSmall forStep:step inDistance:distanceToEndOfPath forSpeed:speed];

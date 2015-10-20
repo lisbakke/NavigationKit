@@ -30,8 +30,8 @@
         }
         self.gmsPath = gmsPath;
         self.polyline = [MKPolyline polylineWithCoordinates:coordinates count:[self.path count]];
-
         free(coordinates);
+        self.expectedTravelTime = [[[step valueForKey:@"duration"] valueForKey:@"value"] doubleValue];
 
         self.instructions = [step valueForKey:@"html_instructions"];
         // Change a string such as:

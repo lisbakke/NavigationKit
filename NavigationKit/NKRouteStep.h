@@ -48,6 +48,8 @@ typedef NS_ENUM(NSInteger, NKRouteStepManeuver) {
 
 @property (nonatomic, strong) GMSPath *gmsPath;
 
+@property (nonatomic) NSTimeInterval expectedTravelTime;
+
 - (id)initWithGoogleMapsStep:(NSDictionary *)step;
 
 - (id)initWithMKRouteStep:(MKRouteStep *)step;
