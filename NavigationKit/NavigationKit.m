@@ -72,7 +72,8 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
     mode = @"walking";
 
   NSString *requestURL = [NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/directions/json?origin=%f,"
-                                                        "%f&destination=%f,%f&sensor=true&mode=%@&language=%@&key=%@",
+                                                        "%f&destination=%f,%f&sensor=true&mode=%@&language=%@&key=%@"
+                                                        "&alternatives=true",
                                                     self.source.latitude,
                                                     self.source.longitude,
                                                     self.destination.latitude,
@@ -197,7 +198,8 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
     NKRouteStep *firstStep = self.route.steps[self.lastCurrentStepNum];
     if (firstStep) {
       [self.enteredRouteStepNotifications addObject:firstStep];
-      [delegate navigationKitEnteredRouteStep:firstStep nextStep:self.route.steps[1]];
+      NKRouteStep *nextStep = self.route.steps.count > 1 ? self.route.steps[1] : nil;
+      [delegate navigationKitEnteredRouteStep:firstStep nextStep:nextStep];
     }
   }
 }
@@ -224,7 +226,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
 - (void)calculateActionForLocation:(CLLocation *)location {
 
   // If Turn-by-Turn navigation is not enabled, don't perform any calculations
-  if(!self.isNavigating || location == nil || self.route == nil)
+  if (!self.isNavigating || location == nil || self.route == nil)
     return;
 
   // Calculate wether the user is anywhere on the path returned from the directions service (i.e. on route)
@@ -258,6 +260,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   }
 
   self.distanceToEndOfRoute = [self distanceToEndOfRoute:newCurrentRouteStep location:location];
+  NSLog(@"self.distancetoendofroute %f", self.distanceToEndOfRoute);
   if (self.distanceToEndOfRoute <= kDistanceToEndOfRouteTriggersArrived) {
     [self arrivedAtDestination];
     return;

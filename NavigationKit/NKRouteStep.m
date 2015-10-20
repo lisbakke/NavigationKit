@@ -28,7 +28,7 @@
         for (int i = 0; i < [self.path count]; i++) {
             coordinates[i] = ((NSValue *)self.path[i]).MKCoordinateValue;
         }
-
+        self.gmsPath = gmsPath;
         self.polyline = [MKPolyline polylineWithCoordinates:coordinates count:[self.path count]];
 
         free(coordinates);

@@ -46,6 +46,8 @@ typedef NS_ENUM(NSInteger, NKRouteStepManeuver) {
 @property (nonatomic) MKDirectionsTransportType transportType;
 @property (nonatomic) NKRouteStepManeuver maneuver;
 
+@property (nonatomic, strong) GMSPath *gmsPath;
+
 - (id)initWithGoogleMapsStep:(NSDictionary *)step;
 
 - (id)initWithMKRouteStep:(MKRouteStep *)step;

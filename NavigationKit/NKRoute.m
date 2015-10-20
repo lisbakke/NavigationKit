@@ -58,23 +58,8 @@
     if (self && route) {
 
         // Decode the Path and convert coordinates to MKPolyline
-        NSString *encodedPolyline = [[route valueForKey:@"overview_polyline"] valueForKey:@"points"];
-        GMSPath *gmsPath = [GMSPath pathFromEncodedPath:encodedPolyline];
-
-        NSMutableArray *path = [@[] mutableCopy];
-        for (NSUInteger i = 0; i < gmsPath.count; i++) {
-            [path addObject:[NSValue valueWithMKCoordinate:[gmsPath coordinateAtIndex:i]]];
-        }
-        self.path = path;
-        CLLocationCoordinate2D *coordinates = calloc([self.path count], sizeof(CLLocationCoordinate2D));
-
-        for (int i = 0; i < [self.path count]; i++) {
-            coordinates[i] = ((NSValue *)self.path[i]).MKCoordinateValue;
-        }
-
-        self.polyline = [MKPolyline polylineWithCoordinates:coordinates count:[self.path count]];
-
-        free(coordinates);
+//        NSString *encodedPolyline = [[route valueForKey:@"overview_polyline"] valueForKey:@"points"];
+//        GMSPath *gmsPath = [GMSPath pathFromEncodedPath:encodedPolyline];
 
         // Find all steps and convert to NKRouteStep's
         NSArray *legs = [route valueForKey:@"legs"];
@@ -84,11 +69,15 @@
             NSArray *steps = leg[@"steps"];
             for (NSDictionary *step in steps) {
                 NKRouteStep *routeStep = [[NKRouteStep alloc] initWithGoogleMapsStep:step];
+                // Remove the last step if it's a baby step because it is usually having us turn down an alley.
+                if (step == steps.lastObject && routeStep.distance <= 60) continue;
                 [routeSteps addObject:routeStep];
+
             }
             time += [[[leg valueForKey:@"duration"] valueForKey:@"value"] doubleValue];
         }
 
+        NSMutableArray *path = [@[] mutableCopy];
         // Move all of the directions descriptions back one and remove the first direction description.
         for (NSUInteger i = 0; i < routeSteps.count; i++) {
             NKRouteStep *step = routeSteps[i];
@@ -100,7 +89,23 @@
                 step.instructions = @"Arrived at destination.";
                 step.maneuver = NKRouteStepManeuverArrived;
             }
+            for (NSUInteger i = 0; i < step.gmsPath.count; i++) {
+                [path addObject:[NSValue valueWithMKCoordinate:[step.gmsPath coordinateAtIndex:i]]];
+            }
         }
+        self.path = path;
+
+        CLLocationCoordinate2D *coordinates = calloc([self.path count], sizeof(CLLocationCoordinate2D));
+
+        for (int i = 0; i < [self.path count]; i++) {
+            coordinates[i] = ((NSValue *)self.path[i]).MKCoordinateValue;
+        }
+
+        self.polyline = [MKPolyline polylineWithCoordinates:coordinates count:[self.path count]];
+
+        free(coordinates);
+
+
 
         self.steps = routeSteps;
 
