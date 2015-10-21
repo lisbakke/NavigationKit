@@ -16,5 +16,5 @@ Pod::Spec.new do |s|
   }
 
   s.frameworks = 'MapKit'
-  s.dependency 'GoogleMaps', '1.10.3'
+  s.dependency 'GoogleMaps'
 end
