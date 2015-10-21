@@ -41,6 +41,9 @@
         // Because we will strip out the HTML later.
         self.instructions = [self.instructions stringByReplacingOccurrencesOfString:@">Destination"
                                                                          withString:@">. Destination"];
+        if (![[self.instructions substringFromIndex:self.instructions.length - 1] isEqualToString:@"."]) {
+            self.instructions = [self.instructions stringByAppendingString:@"."];
+        }
         self.distance = [[[step valueForKey:@"distance"] valueForKey:@"value"] doubleValue];
         if([[step valueForKey:@"travel_mode"] isEqualToString:@"DRIVING"])
             self.transportType = MKDirectionsTransportTypeAutomobile;
