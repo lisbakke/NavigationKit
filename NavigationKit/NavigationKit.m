@@ -41,7 +41,7 @@
 @synthesize delegate;
 static NSTimeInterval kMinTimeBetweenRecalculations = 10.f;
 static double kMinNewSmallStepNotifDistance = 152.f; // 500 ft
-static double kMinNewMediumStepNotifDistance = 885.f; // .5499 mi
+static double kMinNewMediumStepNotifDistance = 2092.15; // 1.3 mi
 static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
 
 - (id)initWithSource:(CLLocationCoordinate2D)source destination:(CLLocationCoordinate2D)destination
@@ -57,7 +57,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
     _recalculatingTolerance = -1;
     _cameraAltitude = -1;
     _heading = -1;
-    _nextTurnNotifSmallEtaSeconds = 3;
+    _nextTurnNotifSmallEtaSeconds = 8;
     _nextTurnNotifMediumEtaSeconds = 30;
     _nextTurnNotifLargeEtaSeconds = 60;
   }
