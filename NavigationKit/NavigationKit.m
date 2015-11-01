@@ -57,7 +57,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
     _recalculatingTolerance = -1;
     _cameraAltitude = -1;
     _heading = -1;
-    _nextTurnNotifSmallEtaSeconds = 8;
+    _nextTurnNotifSmallEtaSeconds = 11;
     _nextTurnNotifMediumEtaSeconds = 30;
     _nextTurnNotifLargeEtaSeconds = 60;
   }
