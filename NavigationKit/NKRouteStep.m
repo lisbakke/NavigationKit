@@ -47,7 +47,7 @@
         self.distance = [[[step valueForKey:@"distance"] valueForKey:@"value"] doubleValue];
         if([[step valueForKey:@"travel_mode"] isEqualToString:@"DRIVING"])
             self.transportType = MKDirectionsTransportTypeAutomobile;
-
+        NSLog(@"NavigationKit: Instruction '%@' Maneuver '%@'", self.instructions, [step valueForKey:@"maneuver"]);
         self.maneuver = [self maneuver:[step valueForKey:@"maneuver"]];
     }
 
@@ -87,68 +87,68 @@
 }
 
 - (NKRouteStepManeuver)maneuver:(NSString *)googleManeuver {
-    
-    if(!googleManeuver)
-        return NKRouteStepManeuverUnknown;
-    
-    if([googleManeuver isEqualToString:@"turn-sharp-left"])
+
+    if (!googleManeuver)
+        return NKRouteStepManeuverStraight;
+
+    if ([googleManeuver isEqualToString:@"turn-sharp-left"])
         return NKRouteStepManeuverTurnSharpLeft;
     
-    if([googleManeuver isEqualToString:@"uturn-right"])
+    if ([googleManeuver isEqualToString:@"uturn-right"])
         return NKRouteStepManeuverUturnRight;
     
-    if([googleManeuver isEqualToString:@"turn-slight-right"])
+    if ([googleManeuver isEqualToString:@"turn-slight-right"])
         return NKRouteStepManeuverTurnSlightRight;
     
-    if([googleManeuver isEqualToString:@"merge"])
+    if ([googleManeuver isEqualToString:@"merge"])
         return NKRouteStepManeuverMerge;
     
-    if([googleManeuver isEqualToString:@"roundabout-left"])
+    if ([googleManeuver isEqualToString:@"roundabout-left"])
         return NKRouteStepManeuverRoundaboutLeft;
     
-    if([googleManeuver isEqualToString:@"roundabout-right"])
+    if ([googleManeuver isEqualToString:@"roundabout-right"])
         return NKRouteStepManeuverRoundaboutRight;
     
-    if([googleManeuver isEqualToString:@"uturn-left"])
+    if ([googleManeuver isEqualToString:@"uturn-left"])
         return NKRouteStepManeuverUturnLeft;
     
-    if([googleManeuver isEqualToString:@"turn-slight-left"])
+    if ([googleManeuver isEqualToString:@"turn-slight-left"])
         return NKRouteStepManeuverTurnSlightLeft;
     
-    if([googleManeuver isEqualToString:@"turn-left"])
+    if ([googleManeuver isEqualToString:@"turn-left"])
         return NKRouteStepManeuverTurnLeft;
     
-    if([googleManeuver isEqualToString:@"ramp-right"])
+    if ([googleManeuver isEqualToString:@"ramp-right"])
         return NKRouteStepManeuverRampRight;
     
-    if([googleManeuver isEqualToString:@"turn-right"])
+    if ([googleManeuver isEqualToString:@"turn-right"])
         return NKRouteStepManeuverTurnRight;
     
-    if([googleManeuver isEqualToString:@"fork-right"])
+    if ([googleManeuver isEqualToString:@"fork-right"])
         return NKRouteStepManeuverForkRight;
     
-    if([googleManeuver isEqualToString:@"straight"])
+    if ([googleManeuver isEqualToString:@"straight"])
         return NKRouteStepManeuverStraight;
     
-    if([googleManeuver isEqualToString:@"fork-left"])
+    if ([googleManeuver isEqualToString:@"fork-left"])
         return NKRouteStepManeuverForkLeft;
     
-    if([googleManeuver isEqualToString:@"ferry-train"])
+    if ([googleManeuver isEqualToString:@"ferry-train"])
         return NKRouteStepManeuverFerryTrain;
     
-    if([googleManeuver isEqualToString:@"turn-sharp-right"])
+    if ([googleManeuver isEqualToString:@"turn-sharp-right"])
         return NKRouteStepManeuverTurnSharpRight;
     
-    if([googleManeuver isEqualToString:@"ramp-left"])
+    if ([googleManeuver isEqualToString:@"ramp-left"])
         return NKRouteStepManeuverRampLeft;
     
-    if([googleManeuver isEqualToString:@"ferry"])
+    if ([googleManeuver isEqualToString:@"ferry"])
         return NKRouteStepManeuverFerry;
     
-    if([googleManeuver isEqualToString:@"keep-left"])
+    if ([googleManeuver isEqualToString:@"keep-left"])
         return NKRouteStepManeuverKeepLeft;
     
-    if([googleManeuver isEqualToString:@"keep-right"])
+    if ([googleManeuver isEqualToString:@"keep-right"])
         return NKRouteStepManeuverKeepRight;
     
     return NKRouteStepManeuverUnknown;

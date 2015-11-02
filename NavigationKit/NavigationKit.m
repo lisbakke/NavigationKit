@@ -399,6 +399,9 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   if (step == self.route.steps.lastObject && eta && eta.floatValue < self.nextTurnNotifSmallEtaSeconds) {
     [self arrivedAtDestination];
   }
+  if ([delegate respondsToSelector:@selector(navigationKitCalculatedTimeToNextStep:)] && eta) {
+    [delegate navigationKitCalculatedTimeToNextStep:eta.doubleValue];
+  }
 }
 
 - (void)arrivedAtDestination {
