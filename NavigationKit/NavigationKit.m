@@ -304,14 +304,14 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   [self notifyNextStep:newCurrentRouteStep inDistance:self.distanceToEndOfPath forSpeed:location.speed];
 
   // Calculate the camera angle based on current step, heading and user settings
-  if([delegate respondsToSelector:@selector(navigationKitCalculatedCamera:)]) {
+  if ([delegate respondsToSelector:@selector(navigationKitCalculatedCamera:)]) {
     MKMapCamera *camera = nil;
-    if(self.lastCurrentStepNum == 0)
+    if (self.lastCurrentStepNum == 0)
       camera = [self defaultCamera:location];
     else
       camera = [self cameraForStep:newCurrentRouteStep location:location];
 
-    if(camera)
+    if (camera)
       [delegate navigationKitCalculatedCamera:camera];
   }
 }
@@ -352,7 +352,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
 }
 
 - (NSNumber *)etaSecondsForDistance:(CLLocationDistance)distance withSpeed:(CLLocationSpeed)speed {
-  if (speed == 0.f) return nil;
+  if (speed <= 0.f) return nil;
   return @(distance / speed);
 }
 
@@ -548,18 +548,18 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   for(int i = initialOffset; i < self.route.steps.count; i++) {
     NKRouteStep *routeStep = self.route.steps[i];
     //NSLog(@"step %d", i);
-    if([CKGeometryUtility isCoordinate:location.coordinate onPath:[routeStep path] tolerance:15]) {
+    if ([CKGeometryUtility isCoordinate:location.coordinate onPath:[routeStep path] tolerance:15]) {
       step = i;
       break;
     }
   }
 
-  if(step != INT_MAX)
+  if (step != INT_MAX)
     return step;
 
   for(NKRouteStep *routeStep in self.route.steps) {
     //NSLog(@"step %d", (int)[self.route.steps indexOfObject:routeStep]);
-    if([CKGeometryUtility isCoordinate:location.coordinate onPath:[routeStep path] tolerance:15]) {
+    if ([CKGeometryUtility isCoordinate:location.coordinate onPath:[routeStep path] tolerance:15]) {
       step = (int)[self.route.steps indexOfObject:routeStep];
       break;
     }
@@ -574,7 +574,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   CLLocationDistance totalDistance = 0.0;
 
   // If it's a straight road, get the distance between me and the last point
-  if([path count] == 2)
+  if ([path count] == 2)
     return [location distanceFromLocation:[self locationFromCoordinate:[path[1] MKCoordinateValue]]];
 
   // Find the closest point
@@ -623,21 +623,21 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
   for(i = 0; i < [step.path count]; i++) {
     CLLocationDistance distance = [[self locationFromCoordinate:[step.path[i] MKCoordinateValue]] distanceFromLocation:location];
 
-    if(distance < firstDistance) {
+    if (distance < firstDistance) {
       second = first;
       first = i;
       secondDistance = firstDistance;
       firstDistance = distance;
     }
 
-    else if(distance < secondDistance && distance != first) {
+    else if (distance < secondDistance && distance != first) {
       second = i;
       secondDistance = distance;
     }
   }
 
   // return null if we failed to find locations
-  if(first == INT_MAX || second == INT_MAX)
+  if (first == INT_MAX || second == INT_MAX)
     return nil;
 
   // Get heading
