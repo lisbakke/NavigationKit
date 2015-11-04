@@ -53,6 +53,7 @@ typedef NS_ENUM(NSInteger, NavigationKitNotificationDistanceType) {
 // User settings
 @property (nonatomic, assign) NSInteger recalculatingTolerance;
 @property (nonatomic, assign) NSInteger cameraAltitude;
+@property (nonatomic, assign) NSInteger maxNumDirectionsRequestsPerDay;
 
 @property (nonatomic) BOOL isNavigating;
 

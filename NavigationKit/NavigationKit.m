@@ -60,6 +60,7 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
     _nextTurnNotifSmallEtaSeconds = 11;
     _nextTurnNotifMediumEtaSeconds = 30;
     _nextTurnNotifLargeEtaSeconds = 60;
+    _maxNumDirectionsRequestsPerDay = 60;
   }
 
   return self;
@@ -152,7 +153,10 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
 
 - (void)calculateDirectionsWithHeading:(CLLocationDirection)heading {
   [self resetState];
-
+  if ([self incrementNumRequestsIsOutOfQuota]) {
+    [self stopNavigation];
+    return;
+  }
   switch (self.directionsService) {
     case NavigationKitDirectionsServiceAppleMaps:
       [self calculateDirectionsAppleMapsWithHeading:heading];
@@ -172,6 +176,50 @@ static const float kDistanceToEndOfRouteTriggersArrived = 30.f;
       break;
     }
   }
+}
+
+- (BOOL)incrementNumRequestsIsOutOfQuota {
+  NSNumber *numRequestsToday = [self getNumRequestsToday];
+  if (numRequestsToday) {
+    NSLog(@"NavigationKit: Num requests today %@", numRequestsToday);
+    if (numRequestsToday.integerValue > self.maxNumDirectionsRequestsPerDay) {
+      NSLog(@"NavigationKit: User has made %d/%d requests today.", numRequestsToday.integerValue,
+          self.maxNumDirectionsRequestsPerDay);
+      return YES;
+    }
+  } else {
+    numRequestsToday = @(0);
+  }
+  [self setNumRequestsToday:@( numRequestsToday.integerValue + 1 )];
+  return NO;
+}
+
+- (NSNumber *)getNumRequestsToday {
+  NSString *kTodayQuotaKey = @"navigationkit_numrequests";
+  NSString *numRequestsString = [[NSUserDefaults standardUserDefaults] objectForKey:kTodayQuotaKey];
+  if (numRequestsString) {
+    NSArray *components = [numRequestsString componentsSeparatedByString:@","];
+    NSString *dateString = components[0];
+    NSNumber *numRequests = @( ((NSString *)components[1]).integerValue );
+    if ([dateString isEqualToString:[self getDateString]]) {
+      return numRequests;
+    }
+  }
+
+  return @( 0 );
+}
+
+- (void)setNumRequestsToday:(NSNumber *)num {
+  NSString *kTodayQuotaKey = @"navigationkit_numrequests";
+  NSString *requestsString = [NSString stringWithFormat:@"%@,%@", [self getDateString], num];
+  [[NSUserDefaults standardUserDefaults] setObject:requestsString forKey:kTodayQuotaKey];
+}
+
+- (NSString *)getDateString {
+  NSDateFormatter *dateFormatter = [NSDateFormatter new];
+  dateFormatter.dateFormat = @"yyyyMMdd";
+  NSDate *date = [NSDate date];
+  return [dateFormatter stringFromDate:date];
 }
 
 - (void)resetState {
